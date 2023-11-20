@@ -11,6 +11,7 @@ start: install-dependences compose-up migrate-up
 
 compose-up:
 	docker compose up -d
+	@sleep 1
 
 migrate: migrate-up
 	
