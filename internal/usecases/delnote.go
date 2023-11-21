@@ -1,7 +1,7 @@
 package usecases
 
 import (
-    "github.com/serz999/notesServer/internal/dto"
+    "github.com/serz999/notesServer/pkg/dto"
 )
 
 type DelNoteInteractor struct {

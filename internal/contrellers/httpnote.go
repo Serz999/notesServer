@@ -5,8 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/serz999/notesServer/internal/dto"
+	"github.com/serz999/notesServer/pkg/dto"
 	"github.com/serz999/notesServer/internal/usecases"
 )
 
