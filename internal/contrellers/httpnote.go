@@ -66,7 +66,21 @@ func (c *NoteContreller) Add(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.Write([]byte("{" + "id:" + string(id) + "}"))
+    note, geterr := c.getnbyid.Exec(id)
+    if geterr != nil {
+        log.Println(err)
+        WriteInternalServerError(w, err) 
+        return
+    }
+
+    jsonBytes, err := json.Marshal(note)
+    if err != nil {
+        log.Println(err)
+        WriteInternalServerError(w, err)
+        return
+    }
+
+    w.Write(jsonBytes)
 }
 
 func (c *NoteContreller) Del(w http.ResponseWriter, r *http.Request) {
