@@ -8,6 +8,7 @@ type NotesGate interface {
     Add(note dto.Note) (dto.Id, error); 
     GetById(id dto.Id) (dto.Note, error);
     Del(id dto.Id) error; 
+    GetNotFoundMsg() string;
 }
 
 type AddNote interface {
@@ -16,8 +17,10 @@ type AddNote interface {
 
 type DelNote interface { 
     Exec(id dto.Id) error;
+    GetNotFoundMsg() string;
 }
 
 type GetNoteById interface {
     Exec(id dto.Id) (dto.Note, error); 
+    GetNotFoundMsg() string;
 }

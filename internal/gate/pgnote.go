@@ -32,6 +32,10 @@ func NewPgNotesGate(url string) (*PgNotesGate, error) {
     return &PgNotesGate{dbpool}, nil
 }
 
+func (g *PgNotesGate) GetNotFoundMsg() string {
+    return "no rows in result set"
+}
+
 func (g *PgNotesGate) Close() {
     g.dbpool.Close()
 } 

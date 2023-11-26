@@ -15,3 +15,7 @@ func NewDelNoteInteractor(gate NotesGate) *DelNoteInteractor {
 func (deln *DelNoteInteractor) Exec(id dto.Id) (err error) {
     return deln.gate.Del(id) 
 }
+
+func (deln *DelNoteInteractor) GetNotFoundMsg() string {
+    return deln.gate.GetNotFoundMsg()
+}

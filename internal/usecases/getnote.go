@@ -15,3 +15,7 @@ func NewGetNoteByIdInteractor(gate NotesGate) *GetNoteByIdInteractor {
 func (getn *GetNoteByIdInteractor) Exec(id dto.Id) (dto.Note, error) {
     return getn.gate.GetById(id) 
 }
+
+func (getn *GetNoteByIdInteractor) GetNotFoundMsg() string {
+    return getn.gate.GetNotFoundMsg()
+}

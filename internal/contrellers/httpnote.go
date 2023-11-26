@@ -46,7 +46,7 @@ func (c *NoteContreller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     } else if r.Method == http.MethodDelete && len(url) == 2 && url[1] != "" {
         c.Del(w, r)
     } else {
-        WriteNotFound(w)     
+        WriteNotFound(w) 
     } 
 }
 
@@ -88,6 +88,10 @@ func (c *NoteContreller) Del(w http.ResponseWriter, r *http.Request) {
     err := c.deln.Exec(id)
     if err != nil {
         log.Println(err)
+        if err.Error() == c.deln.GetNotFoundMsg() {
+            WriteNotFound(w) 
+            return
+        }
         WriteInternalServerError(w, err)
         return
     }
@@ -101,6 +105,10 @@ func (c *NoteContreller) GetById(w http.ResponseWriter, r *http.Request) {
     note, err := c.getnbyid.Exec(id)
     if err != nil {
         log.Println(err)
+        if err.Error() == c.getnbyid.GetNotFoundMsg() {
+            WriteNotFound(w) 
+            return
+        }
         WriteInternalServerError(w, err)
         return
     }
