@@ -6,11 +6,11 @@ MIGRATION_NAME = "migration"
 all: start
 
 start: install-dependences compose-up migrate-up	
-	go install "github.com/serz999/notesServer"
+	go install
 	notesServer
 
 compose-up:
-	docker compose up -d
+	docker compose up -d || true
 	@sleep 1
 
 migrate: migrate-up
