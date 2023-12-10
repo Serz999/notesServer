@@ -2,7 +2,7 @@ package gate
 
 import (
 	"context"
-    "github.com/google/uuid"
+
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,29 +32,26 @@ func NewPgNotesGate(url string) (*PgNotesGate, error) {
     return &PgNotesGate{dbpool}, nil
 }
 
-func (g *PgNotesGate) GetNotFoundMsg() string {
-    return "no rows in result set"
-}
-
 func (g *PgNotesGate) Close() {
     g.dbpool.Close()
 } 
 
-func (g *PgNotesGate) Add(note dto.Note) (dto.Id, error) {
-    query := `INSERT INTO note (id, author_first_name, aurhor_last_name, note) VALUES ($1, $2, $3, $4)`
+func (g *PgNotesGate) Add(note dto.Note) (int64, error) {
+    query := `INSERT INTO note (author_first_name, aurhor_last_name, note) VALUES ($1, $2, $3) RETURNING id`
     
-    uuid := uuid.NewString()
-    _, err := g.dbpool.Exec(context.Background(), query, 
-        uuid,
+    var id int64
+    err := g.dbpool.QueryRow(context.Background(), query, 
         note.AuthorFirstName,
         note.AuthorLastName,
         note.Note,
-    ) 
+    ).Scan(
+        &id,
+    )
 
-    return dto.Id(uuid), err
+    return id, err
 } 
 
-func (g *PgNotesGate) GetById(id dto.Id) (dto.Note, error) {
+func (g *PgNotesGate) GetById(id int64) (dto.Note, error) {
     query := `SELECT * FROM note WHERE id = $1`
     
     note := dto.Note{}
@@ -65,15 +62,27 @@ func (g *PgNotesGate) GetById(id dto.Id) (dto.Note, error) {
         &note.Note,
     )
 
+    if err != nil {
+        if err.Error() == "no rows in result set" {
+            err = &dto.NotFoundErr{}
+        }
+    } 
+
     return note, err
 }
 
-func (g *PgNotesGate) Del(id dto.Id) error {
+func (g *PgNotesGate) Del(id int64) error {
     query := `DELETE FROM note WHERE id = @id` 
     args := pgx.NamedArgs{
         "id": id,
     }
     _, err := g.dbpool.Exec(context.Background(), query, args)
+
+    if err != nil {
+        if err.Error() == "no rows in result set" {
+            err = &dto.NotFoundErr{}
+        }
+    }  
 
     return err
 } 

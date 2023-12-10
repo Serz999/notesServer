@@ -2,11 +2,14 @@ package contrellers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
-	"github.com/serz999/notesServer/pkg/dto"
+
 	"github.com/serz999/notesServer/internal/usecases"
+	"github.com/serz999/notesServer/pkg/dto"
 )
 
 type NoteContreller struct {
@@ -64,12 +67,8 @@ func (c *NoteContreller) Add(w http.ResponseWriter, r *http.Request) {
         WriteInternalServerError(w, err) 
         return
     }
-
-    note, geterr := c.getnbyid.Exec(id)
-    if geterr != nil {
-        WriteInternalServerError(w, err) 
-        return
-    }
+    
+    note = dto.Note{Id: dto.Id(strconv.FormatInt(id, 10))}
 
     jsonBytes, err := json.Marshal(note)
     if err != nil {
@@ -81,10 +80,11 @@ func (c *NoteContreller) Add(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *NoteContreller) Del(w http.ResponseWriter, r *http.Request) {
-    id := dto.Id(strings.Split(r.URL.Path, "/")[1:][1]) 
-    err := c.deln.Exec(id)
+    id, _ := strconv.Atoi(strings.Split(r.URL.Path, "/")[1:][1]) 
+    err := c.deln.Exec(int64(id))
     if err != nil {
-        if err.Error() == c.deln.GetNotFoundMsg() {
+        var notFoundErr *dto.NotFoundErr
+        if errors.As(err, &notFoundErr) {
             WriteNotFound(w) 
             return
         }
@@ -97,10 +97,11 @@ func (c *NoteContreller) Del(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *NoteContreller) GetById(w http.ResponseWriter, r *http.Request) {
-    id := dto.Id(strings.Split(r.URL.Path, "/")[1:][1]) 
-    note, err := c.getnbyid.Exec(id)
+    id, _ := strconv.Atoi(strings.Split(r.URL.Path, "/")[1:][1])
+    note, err := c.getnbyid.Exec(int64(id))
     if err != nil {
-        if err.Error() == c.getnbyid.GetNotFoundMsg() {
+        var notFoundErr *dto.NotFoundErr
+        if errors.As(err, &notFoundErr) {
             WriteNotFound(w) 
             return
         }

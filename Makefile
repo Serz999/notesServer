@@ -4,12 +4,13 @@ MIGRATION_PATH = "./migrations"
 MIGRATION_NAME = "migration"
 GOPATH = $(HOME)/go
 GOBIN = $(GOPATH)/bin
+STORAGE = "postgres"
 
 all: start
 
 start: compose-up migrate	
 	go install
-	$(GOBIN)/notesServer
+	$(GOBIN)/notesServer $(STORAGE)
 
 compose-up:
 	docker compose up -d

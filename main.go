@@ -4,7 +4,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"github.com/joho/godotenv"
+	"github.com/serz999/golist"
+	"github.com/serz999/gomap"
 	"github.com/serz999/notesServer/internal/contrellers"
 	"github.com/serz999/notesServer/internal/gate"
 	"github.com/serz999/notesServer/internal/usecases"
@@ -16,18 +19,37 @@ func main() {
         log.Fatal(enverr)
     }
 
-    pgurl := os.Getenv("DB_URL")
-
-    pg, gateerr := gate.NewPgNotesGate(pgurl) 
-    if gateerr != nil {
-        log.Fatal(gateerr)
+    var storageType string 
+    if len(os.Args) > 1 {
+        storageType = os.Args[1]
     }
-    defer pg.Close()
+
+    var g usecases.NotesGate
+    if storageType == "list" {
+        var err error
+        g, err = gate.NewStorageGate(golist.NewList())  
+        if err != nil {
+            log.Fatal(err)
+        }
+    } else if storageType == "map" {
+        var err error
+        g, err = gate.NewStorageGate(gomap.NewMap())  
+        if err != nil {
+            log.Fatal(err)
+        }
+    } else {
+        var err error
+        g, err = gate.NewPgNotesGate(os.Getenv("DB_URL")) 
+        if err != nil {
+            log.Fatal(err)
+        }
+        defer g.(*gate.PgNotesGate).Close()
+    }
 
     notesController := contrellers.NewNoteController(
-        usecases.NewAddNoteInteractor(pg),
-        usecases.NewDelNoteInteractor(pg),
-        usecases.NewGetNoteByIdInteractor(pg),
+        usecases.NewAddNoteInteractor(g),
+        usecases.NewDelNoteInteractor(g),
+        usecases.NewGetNoteByIdInteractor(g),
     )
     
     mux := http.NewServeMux()

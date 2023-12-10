@@ -5,22 +5,19 @@ import (
 )
 
 type NotesGate interface {
-    Add(note dto.Note) (dto.Id, error); 
-    GetById(id dto.Id) (dto.Note, error);
-    Del(id dto.Id) error; 
-    GetNotFoundMsg() string;
+    Add(note dto.Note) (int64, error); 
+    GetById(id int64) (dto.Note, error);
+    Del(id int64) error; 
 }
 
 type AddNote interface {
-    Exec(note dto.Note) (dto.Id, error); 
+    Exec(note dto.Note) (int64, error); 
 }
 
 type DelNote interface { 
-    Exec(id dto.Id) error;
-    GetNotFoundMsg() string;
+    Exec(id int64) error;
 }
 
 type GetNoteById interface {
-    Exec(id dto.Id) (dto.Note, error); 
-    GetNotFoundMsg() string;
+    Exec(id int64) (dto.Note, error); 
 }
